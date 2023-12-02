@@ -8,20 +8,22 @@ const { HTTP_STATUS_CODES } = require('../constants')
 router.post('/add', async (req, res) => {
     try {
         payload = req.body;
-        let startTime = new Date(payload.startTime)
+        const startTime = new Date(payload.startTime); // Convert startTime to a Date object
+        const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000 + 30 * 60 * 1000);
+
         const newShowTime = new ShowTime({
             movieId: payload.movieId,
             screenId: payload.screenId,
-            startTime: payload.startTime,
-            endTime: new Date(startTime.getTime() + 2 * 60 * 60 * 1000 + 30 * 60 * 1000),
+            startTime: startTime,
+            endTime: endTime,
             price: payload.price,
             discountPrice: payload.discountPrice,
             seatsBooked: [],
             isActive: true
         });
 
-        await newShowTime.save();
-        res.json({ message: "Added show times successfully", status: HTTP_STATUS_CODES.OK });
+        const createdShowTime = await newShowTime.save();
+        res.json({ message: "Added show times successfully", status: HTTP_STATUS_CODES.OK, data: createdShowTime });
     } catch (error) {
         console.error('Error while adding screen:', error);
         res.json({

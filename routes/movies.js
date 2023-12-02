@@ -5,7 +5,6 @@ const Movie = require('../models/movies');
 const Theatre = require('../models/theatres');
 const Screen = require('../models/screens');
 const ShowTime = require('../models/showTimes');
-const uniqid = require('uniqid');
 const { HTTP_STATUS_CODES } = require('../constants')
 
 router.post('/add', async (req, res) => {
@@ -35,7 +34,7 @@ router.post('/add', async (req, res) => {
 
         // Save the movie to the database
         const movie = await newMovie.save();
-        res.json({ message: "Added movie successfully", status: HTTP_STATUS_CODES.OK,  movie: movie });
+        res.json({ message: "Added movie successfully", status: HTTP_STATUS_CODES.OK,  data: movie });
     } catch (error) {
         console.error('Error creating movie:', error);
         res.status(500).send('Internal Server Error');
@@ -45,7 +44,7 @@ router.post('/add', async (req, res) => {
 router.get('/getAll', async (req, res) => {
     try {
         const movies = await Movie.find({ isActive: true });
-        res.json({ message: "Record[s] found", status: HTTP_STATUS_CODES.OK, movies: movies });
+        res.json({ message: "Record[s] found", status: HTTP_STATUS_CODES.OK, data: movies });
     } catch (error) {
         console.error('Error on getting list of movies:', error);
         res.status(500).send('Internal Server Error');

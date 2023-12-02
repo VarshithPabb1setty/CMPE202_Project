@@ -30,7 +30,7 @@ router.post('/add', async (req, res) => {
     }
 });
 
-router.post('/getAll', async (req, res) => {
+router.get('/getAll', async (req, res) => {
     try {
         const screens = await Screen.find( { isActive: true});
         if (screens.length) {
@@ -55,7 +55,7 @@ router.post('/getAll', async (req, res) => {
         res.json({
             message: 'Records found',
             status: HTTP_STATUS_CODES.OK,
-            data: theatres
+            data: screens
         });
     }
     catch (err) {
@@ -64,44 +64,74 @@ router.post('/getAll', async (req, res) => {
     }
 });
 
-// add showTimesList to each screen
 router.get('/get/:id', async (req, res) => {
-
     try {
-        const theatre = await Theatre.find({ _id: req.params.id, isActive: true });
-        console.log(theatre);
+        const screenId = req.params.id;
 
-        if (theatre.length) {
-            const screens = await Screen.find({ theatreId: theatre[0]._doc._id, isActive: true });
-
-            if (screens.length) {
-                theatre[0]._doc.screensList = screens;
-            } else {
-                theatre[0]._doc.screensList = [];
-            }
-        } else {
-            res.json({
-                message: 'No record found',
-                status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR
-            })
+        const screen = await Screen.findOne({ _id: screenId, isActive: true });
+        if (!screen) {
+            return res.json({
+                message: 'Screen not found',
+                status: HTTP_STATUS_CODES.NOT_FOUND,
+                data: null
+            });
         }
+
+        const showTimes = await ShowTime.find({ screenId: screen._id, isActive: true });
+
+        // Include showTimes in the screen object
+        screen._doc.showTimes = showTimes;
 
         res.json({
             message: 'Record found',
             status: HTTP_STATUS_CODES.OK,
-            data: theatre
-        })
+            data: screen
+        });
+    } catch (err) {
+        console.error('Error while fetching screen:', err);
+        res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send('Internal Server Error');
+    }
+});
 
-    }
-    catch (err) {
-        console.log(err);
-        res.json({
-            message: 'Theatre Not found',
-            status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
-            data: JSON.stringify("")
-        })
-    }
-})
+
+// // add showTimesList to each screen
+// router.get('/get/:id', async (req, res) => {
+
+//     try {
+//         const theatre = await Theatre.find({ _id: req.params.id, isActive: true });
+//         console.log(theatre);
+
+//         if (theatre.length) {
+//             const screens = await Screen.find({ theatreId: theatre[0]._doc._id, isActive: true });
+
+//             if (screens.length) {
+//                 theatre[0]._doc.screensList = screens;
+//             } else {
+//                 theatre[0]._doc.screensList = [];
+//             }
+//         } else {
+//             res.json({
+//                 message: 'No record found',
+//                 status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR
+//             })
+//         }
+
+//         res.json({
+//             message: 'Record found',
+//             status: HTTP_STATUS_CODES.OK,
+//             data: theatre
+//         })
+
+//     }
+//     catch (err) {
+//         console.log(err);
+//         res.json({
+//             message: 'Theatre Not found',
+//             status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+//             data: JSON.stringify("")
+//         })
+//     }
+// })
 
 router.post('/update/:id', async (req, res) => {
     try {

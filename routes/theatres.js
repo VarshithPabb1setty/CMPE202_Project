@@ -4,7 +4,6 @@ const router = express.Router();
 const { HTTP_STATUS_CODES } = require('../constants')
 const Theatre = require('../models/theatres');
 const { Screen }= require('../models/screens');
-const uniqid = require('uniqid');
 
 router.post('/add', async (req, res) => {
     try {

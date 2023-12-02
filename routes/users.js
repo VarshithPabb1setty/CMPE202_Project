@@ -38,8 +38,8 @@ router.post('/signup', async (req, res) => {
         });
 
         // Save the user to the database
-        await newUser.save();
-        res.json({ message: "User registered successfully", status: HTTP_STATUS_CODES.OK });
+        const user = await newUser.save();
+        res.json({ message: "User registered successfully", status: HTTP_STATUS_CODES.OK, data: user });
     } catch (error) {
         console.error('Error creating user:', error);
         res.status(500).send('Internal Server Error');
@@ -145,6 +145,11 @@ router.post('/updateProfile', async (req, res) => {
         res.json({ message: "Cannot update user details", status: HTTP_STATUS_CODES.NOT_FOUND });
     }
 });
+
+// purchase history
+router.get('/purchaseHistory/:id', async (req, res) => {
+    // To be done
+})
 
 
 module.exports = router;
