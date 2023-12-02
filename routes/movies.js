@@ -13,7 +13,7 @@ router.post('/add', async (req, res) => {
         console.log(req.body);
         const payload = req.body;
         const newMovie = new Movie({
-            movieId: uniqid(),
+            // movieId: uniqid(),
             title: payload.title,
             cast: payload.cast && payload.cast.length ? payload.cast : null,
             crew: payload.crew && payload.crew.length ? payload.crew : null,

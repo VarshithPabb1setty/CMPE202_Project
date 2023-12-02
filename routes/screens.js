@@ -79,6 +79,7 @@ router.post('/getAll', async (req, res) => {
     }
 });
 
+// add showTimesList to each screen
 router.get('/get/:id', async (req, res) => {
 
     try {
@@ -117,4 +118,5 @@ router.get('/get/:id', async (req, res) => {
     }
 })
 
+// Update and Delete routes
 module.exports = router;

@@ -44,12 +44,12 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  isAdmin: {
-    type: Boolean
-  },
-  isPrime: {
-    type: Boolean
-  },
+  // isAdmin: {
+  //   type: Boolean
+  // },
+  // isPrime: {
+  //   type: Boolean
+  // },
   email: { 
     type: String,
     required: true, 

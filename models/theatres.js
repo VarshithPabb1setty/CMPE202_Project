@@ -29,7 +29,7 @@ const theatreSchema = new mongoose.Schema({
   city: { 
     type: String 
   },
-  theatreUrl: { 
+  theatreUrl: { // Poster of the theatre
     type: String 
   },
   isActive: {
