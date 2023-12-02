@@ -93,7 +93,8 @@ router.get('/get/:id', async (req, res) => {
 
         res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK, data: response });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error while updating a movie:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
 //     try {

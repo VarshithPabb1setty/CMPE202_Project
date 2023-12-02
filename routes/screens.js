@@ -30,21 +30,6 @@ router.post('/add', async (req, res) => {
     }
 });
 
-// router.get('/getAllScreens', async (req, res) => {
-//     try {
-
-//         // Save the user to the database
-//         const screen = await Screen.find({ isActive: true });
-//         res.json({ message: "Screens Found", status: HTTP_STATUS_CODES.OK, screens: screen });
-//     } catch (error) {
-//         console.error('Error creating user:', error);
-//         res.json({
-//             message: "Internal Server Error",
-//             status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR
-//         })
-//     }
-// })
-
 router.post('/getAll', async (req, res) => {
     try {
         const screens = await Screen.find( { isActive: true});
