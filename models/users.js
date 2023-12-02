@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 
 
 const userSchema = new mongoose.Schema({
-  userId:
-  {
-    type: String
-  },
+  // userId : {
+  //   type: String,
+  // },
   firstName: 
   {
     type: String
@@ -16,29 +15,43 @@ const userSchema = new mongoose.Schema({
   fullName: { 
     type: String
   },
-  dob:{
+  dob: {
     type: Date
   },
-  gender:{
+  gender: {
     type: String,
   },
-  mobile:{
+  mobile: {
     type: String,
   },
-  genres:{
+  genres: {
     type: Array
   },
   favouriteArtists: {
     type:Array
   },
-  isAdmin: { 
+  role: {
+    type: String,
+    enum: ['member', 'non-member', 'admin'],
+    required: true
+  },
+  memberShipType: {
+    type: String,
+    enum: ['regular', 'premium', 'none'],
+    'default': 'none'
+  },
+  rewardPoints: {
+    type: Number,
+    default: 0
+  },
+  isAdmin: {
     type: Boolean
   },
-  isPrime: { 
+  isPrime: {
     type: Boolean
   },
   email: { 
-    type: String, 
+    type: String,
     required: true, 
     unique: true 
   },

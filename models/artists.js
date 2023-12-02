@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
 const artistSchema = new mongoose.Schema({
-    artistId: {
-        type: String,
-    },
+    // artistId: {
+    //     type: String,
+    // },
     artistName: { 
         type: String, 
         required: true 

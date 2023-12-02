@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 
 const movieSchema = new mongoose.Schema({
-  movieId: { 
-    type: String
-  },
+  // movieId: { 
+  //   type: String
+  // },
   title: {
     type: String
   },
@@ -52,10 +52,6 @@ const movieSchema = new mongoose.Schema({
   },
   popularity: {
     type: Number
-  },
-  screenId: {
-    type: Array,
-    
   },
   isActive: {
     type: Boolean

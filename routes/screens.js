@@ -1,38 +1,41 @@
 require('dotenv').config()
 const express = require('express')
 const router = express.Router();
-const { status, Screen } = require('../models/screens');
+const Screen = require('../models/screens');
+const ShowTime = require('../models/showTimes');
 const { HTTP_STATUS_CODES } = require('../constants')
 
-// router.post('/add', async (req, res) => {
+router.post('/add', async (req, res) => {
+    try {
+        payload = req.body;
+        const newScreen = new Screen({
+            screenName: payload.screenName,
+            screenType: payload.screenType,
+            rows: payload.rows,
+            columns: payload.col,
+            seatingCapacity: payload.rows * payload.col,
+            cost: payload.cost,
+            theatreId: payload.theatreId,
+            isActive: true
+        });
+
+        await newScreen.save();
+        res.json({ message: "Added screen successfully", status: HTTP_STATUS_CODES.OK });
+    } catch (error) {
+        console.error('Error while adding screen:', error);
+        res.json({
+            message: "Internal Server Error",
+            status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR
+        })
+    }
+});
+
+// router.get('/getAllScreens', async (req, res) => {
 //     try {
-//         payload = req.body;
-//         console.log(payload);
-//         const seatArray = []
-//         Object.entries(payload.seats).forEach(([row, col]) => {
-//             seatArray.push({
-//                 Row: `${row}`,
-//                 Status: col
-//             })
-//         });
-//         console.log('at /addScreeen');
-//         const count = await Screen.countDocuments({ theatreId: payload.theatreId });
-//         const newScreen = new Screen({
-//             screenId: `${payload.screenName}_${count + 1}`,
-//             screenName: payload.screenName,
-//             showTimes: payload.showTimes,
-//             screenType: payload.screenType,
-//             rows: payload.rows,
-//             columns: payload.col,
-//             seatingCapacity: payload.rows * payload.col,
-//             cost: payload.cost,
-//             seatArray: seatArray,
-//             theatreId: payload.theatreId,
-//             isActive: true
-//         });
-//         // Save the Screen to the database
-//         await newScreen.save();
-//         res.json({ message: "Added screen successfully", status: HTTP_STATUS_CODES.OK });
+
+//         // Save the user to the database
+//         const screen = await Screen.find({ isActive: true });
+//         res.json({ message: "Screens Found", status: HTTP_STATUS_CODES.OK, screens: screen });
 //     } catch (error) {
 //         console.error('Error creating user:', error);
 //         res.json({
@@ -42,46 +45,74 @@ const { HTTP_STATUS_CODES } = require('../constants')
 //     }
 // })
 
-router.post('/screens/add', async (req, res) => {
+router.post('/getAll', async (req, res) => {
     try {
-        payload = req.body;
-        const newScreen = new Screen({
-            screenId: `${payload.screenName}_${count + 1}`,
-            screenName: payload.screenName,
-            showTimes: payload.showTimes,
-            screenType: payload.screenType,
-            rows: payload.rows,
-            columns: payload.col,
-            seatingCapacity: payload.rows * payload.col,
-            cost: payload.cost,
-            seatArray: seatArray,
-            theatreId: payload.theatreId,
-            isActive: true
+        const screens = await Screen.find( { isActive: true});
+        if (screens.length) {
+            const showTimes = await ShowTime.find({ isActive: true });
+
+            if (showTimes.length) {
+                screens.forEach(screen => {
+                    // Filter screens for the current theatre
+                    const showTimesList = showTimes.filter(showTime => showTime.screenId.toString() === screen._id.toString());
+                    // Assign screensList to the current theatre
+                    screen._doc.showTimesDetail = showTimesList; // Using _doc to directly modify the document
+                });
+            }
+        } else {
+            return res.json({
+                message: 'No screens found',
+                status: HTTP_STATUS_CODES.OK,
+                data: []
+            });
+        }
+
+        res.json({
+            message: 'Records found',
+            status: HTTP_STATUS_CODES.OK,
+            data: theatres
         });
-
-        const savedScreen = await newScreen.save();
-
-        // Optionally update the theatre document to include this new screen
-        await Theatre.findByIdAndUpdate(payload.theatreId, { $push: { screens: savedScreen._id }});
-
-        res.status(201).json(savedScreen);
-    } catch (error) {
-        console.error('Error while adding new screen:', error);
-        res.status(500).send('Internal Server Error');
+    }
+    catch (err) {
+        console.error('Error while fetching theatres:', err);
+        res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send('Internal Server Error');
     }
 });
 
-router.get('/getAllScreens', async (req, res) => {
-    try {
+router.get('/get/:id', async (req, res) => {
 
-        // Save the user to the database
-        const screen = await Screen.find({ isActive: true });
-        res.json({ message: "Screens Found", status: HTTP_STATUS_CODES.OK, screens: screen });
-    } catch (error) {
-        console.error('Error creating user:', error);
+    try {
+        const theatre = await Theatre.find({ _id: req.params.id, isActive: true });
+        console.log(theatre);
+
+        if (theatre.length) {
+            const screens = await Screen.find({ theatreId: theatre[0]._doc._id, isActive: true });
+
+            if (screens.length) {
+                theatre[0]._doc.screensList = screens;
+            } else {
+                theatre[0]._doc.screensList = [];
+            }
+        } else {
+            res.json({
+                message: 'No record found',
+                status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR
+            })
+        }
+
         res.json({
-            message: "Internal Server Error",
-            status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR
+            message: 'Record found',
+            status: HTTP_STATUS_CODES.OK,
+            data: theatre
+        })
+
+    }
+    catch (err) {
+        console.log(err);
+        res.json({
+            message: 'Theatre Not found',
+            status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+            data: JSON.stringify("")
         })
     }
 })

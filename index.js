@@ -4,6 +4,7 @@ const cors = require('cors')
 const mongoose = require('./db');
 const UserRoute = require('./routes/users')
 const TheatreRoute = require('./routes/theatres')
+const ShowTimesRoute = require('./routes/showTimes')
 const MovieRoute = require('./routes/movies')
 const ScreenRoute = require('./routes/screens')
 const ArtistRoute = require('./routes/artists')
@@ -13,7 +14,7 @@ const cookieParser = require('cookie-parser');
 // const path = require('path');
 const port = 8080
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: '*',
   // credentials: true,
 };
 
@@ -42,6 +43,7 @@ app.use(
 app.use('/artist', ArtistRoute)
 app.use('/theatres', TheatreRoute)
 app.use('/screens', ScreenRoute)
+app.use('/showTimes', ShowTimesRoute)
 app.use('/movies', MovieRoute)
 app.use('/user', UserRoute)
 app.get('/home', (req, res) => {

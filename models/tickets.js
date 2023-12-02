@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 
 const ticketSchema = new mongoose.Schema({
-    id: { 
-        type: String, 
-        required: true 
-    },
+    // id: { 
+    //     type: String, 
+    //     required: true 
+    // },
     userId: { 
         type: String, 
         required: true 
@@ -22,7 +22,7 @@ const ticketSchema = new mongoose.Schema({
         type: String, 
         required: true 
     },
-    showTime: { 
+    showTime: {
         type: Date, 
         default: Date.now 
     },

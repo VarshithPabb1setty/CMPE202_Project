@@ -7,9 +7,9 @@ const status = {
 }
 
 const screenSchema = new mongoose.Schema({
-    screenId: {
-        type: String,
-    },
+    // screenId: {
+    //     type: String,
+    // },
     screenType: { 
         type: String, 
         required: true 
@@ -30,21 +30,14 @@ const screenSchema = new mongoose.Schema({
         type: Number, 
         required: true 
     },
-    movieId: {
-        type: String,
-    },
-    showTimes: { 
-        type: [String], 
-        required: true 
-    },
-    cost: { 
+    cost: {
         type: Number 
     },
     theatreId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
     },
-    seatArray: { 
+    seatArray: {
         type: [], 
         required: true 
     },
@@ -60,10 +53,7 @@ const screenSchema = new mongoose.Schema({
 });
 
 
-const Screen = mongoose.model('Screens', screenSchema);
+const Screen = mongoose.model('screens', screenSchema);
 
 
-module.exports = {
-    status,
-    Screen,
-};
+module.exports = Screen;

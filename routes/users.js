@@ -30,6 +30,8 @@ router.post('/signup', async (req, res) => {
             genres: [],
             profileUrl: '',
             favouriteArtists: [],
+            role: 'non-member',
+            'memberShipType': 'none',
             isAdmin: false,
             isPrime: false,
             isActive: true
@@ -91,6 +93,35 @@ router.post("/login", async (req, res) => {
     }
 })
 
+router.get('/viewProfile/:id', async (req, res) => {
+    try {
+        const user = await User.find({ _id: req.params.id, isActive: true });
+        console.log(user);
+        if (user.length) {
+            res.json({
+                message: 'Record found',
+                status: HTTP_STATUS_CODES.OK,
+                data: user
+            })
+        } else {
+            res.json({
+                message: 'No Record[s] found',
+                status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+            })
+        }
+
+    }
+    catch (err) {
+        console.log(err);
+        res.json({
+            message: 'User Not found',
+            status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+            data: JSON.stringify("")
+        })
+    }
+
+})
+
 router.post('/updateProfile', async (req, res) => {
     console.log(req.body);
     const payload = req.body;
@@ -102,7 +133,9 @@ router.post('/updateProfile', async (req, res) => {
         user.dob = payload.birthDate
         user.gender = payload.gender
         user.mobile = payload.mobile
-        user.genres = [];
+        user.genres = []
+        user.memberShipType = payload.memberShipType ? payload.memberShipType : 'none'
+        user.role = payload.role ? payload.role : 'none'
         // if (req.file)
         //     user.profileUrl = req.file.location
         user.favouriteArtists = [];

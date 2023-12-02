@@ -10,7 +10,7 @@ router.post('/add', async (req, res) => {
     try {
         const payload = req.body;
         const newTheatre = new Theatre({
-            theatreId: uniqid(),
+            // theatreId: uniqid(),
             theatreName: payload.theatreName ? payload.theatreName : null,
             description: payload.description ? payload.description : null,
             state: payload.state ? payload.state : null,
@@ -36,47 +36,6 @@ router.post('/add', async (req, res) => {
     }
 })
 
-// router.post('/getAll', async (req, res) => {
-//     try {
-//         const theatres = await Theatre.find();
-//         if (theatres.length) {
-//             const screens = await Screen.find({ isActive: true});
-
-//             if (screens.length) {
-//                 for (let theatre of theatres) {
-//                     let screensList = [];
-//                     for (let screen of screens) {
-//                         if (screen.theatreId == theatre.theatreId) {
-//                             screensList.push(screen);
-//                         }
-//                     }
-//                     theatres.screensDetail = screensList;
-//                 }
-//             }
-//         } else {
-//             res.json({
-//                 message: 'No record[s] found',
-//                 status: HTTP_STATUS_CODES.OK,
-//                 data: []
-//             })
-//         }
-//         console.log(theatres)
-//         res.json({
-//             message: 'Record[s] found',
-//             status: HTTP_STATUS_CODES.OK,
-//             data: theatres
-//         })
-//     }
-//     catch (err) {
-//         console.log(err);
-//         res.json({
-//             message: 'Theatre Not found',
-//             status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
-//             data: JSON.stringify("")
-//         })
-//     }
-// })
-
 router.post('/getAll', async (req, res) => {
     try {
         const theatres = await Theatre.find( { isActive: true});
@@ -86,7 +45,7 @@ router.post('/getAll', async (req, res) => {
             if (screens.length) {
                 theatres.forEach(theatre => {
                     // Filter screens for the current theatre
-                    const screensList = screens.filter(screen => screen.theatreId.toString() === theatre.theatreId.toString());
+                    const screensList = screens.filter(screen => screen.theatreId.toString() === theatre._id.toString());
                     // Assign screensList to the current theatre
                     theatre._doc.screensDetail = screensList; // Using _doc to directly modify the document
                 });
@@ -118,7 +77,7 @@ router.get('/get/:id', async (req, res) => {
         console.log(theatre);
 
         if (theatre.length) {
-            const screens = await Screen.find({ theatreId: theatre[0]._doc.theatreId, isActive: true });
+            const screens = await Screen.find({ theatreId: theatre[0]._doc._id, isActive: true });
 
             if (screens.length) {
                 theatre[0]._doc.screensList = screens;

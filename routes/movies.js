@@ -2,6 +2,9 @@ require('dotenv').config()
 const express = require('express')
 const router = express.Router();
 const Movie = require('../models/movies'); 
+const Theatre = require('../models/theatres');
+const Screen = require('../models/screens');
+const ShowTime = require('../models/showTimes');
 const uniqid = require('uniqid');
 const { HTTP_STATUS_CODES } = require('../constants')
 
@@ -49,51 +52,90 @@ router.get('/getAll', async (req, res) => {
     }
 })
 
-// router.get('/get/:id', async (req, res) => {
-//     try {
-//         const movies = await Movie.find({ _id: req.params.id, isActive: true });
-//         res.json({ message: "Record found", status: HTTP_STATUS_CODES.OK, movies: movies });
-//     } catch (error) {
-//         console.error('Error on finding movie:', error);
-//         res.status(500).send('Internal Server Error');
-//     }
-// })
 router.get('/get/:id', async (req, res) => {
     try {
-        const id = req.params.id;
-
-        // Find the movie by ID
-        const movie = await Movie.findById({_id: id, isActive: true });
+        const movieId = req.params.id;
+        const movie = await Movie.findById(movieId);
         if (!movie) {
-            return res.status(404).send('Movie not found');
+            return res.status(404).json({ message: 'Movie not found' });
         }
 
-        // Find screens showing this movie
-        const screens = await Screen.find({ id: movie._id }).populate('theatreId');
+        const theatres = await Theatre.find({}); // You can add conditions if needed
 
-        // Organize data
-        const theatreData = {};
-        for (const screen of screens) {
-            const theatreId = screen.theatreId._id;
-            if (!theatreData[theatreId]) {
-                const theatre = await Theatre.findById(theatreId);
-                theatreData[theatreId] = {
-                    theatre: theatre,
-                    screens: []
-                };
+        // Iterate through theatres to fetch screens and showtimes
+        const theatresWithScreensAndShowtimes = [];
+        for (const theatre of theatres) {
+            const screens = await Screen.find({ theatreId: theatre._id });
+            const screensWithShowtimes = [];
+
+            for (const screen of screens) {
+                const showtimes = await ShowTime.find({ screenId: screen._id, movieId });
+                if (showtimes.length > 0) {
+                    screensWithShowtimes.push({
+                        ...screen._doc,
+                        showtimes,
+                    });
+                }
             }
-            theatreData[theatreId].screens.push(screen);
+
+            if (screensWithShowtimes.length > 0) {
+                theatresWithScreensAndShowtimes.push({
+                    ...theatre._doc,
+                    screens: screensWithShowtimes,
+                });
+            }
         }
 
-        res.json({
-            movie: movie,
-            theatres: Object.values(theatreData)
-        });
+        const response = {
+            movie,
+            theatres: theatresWithScreensAndShowtimes,
+        };
+
+        res.json(response);
     } catch (error) {
-        console.error('Error while fetching movie:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({ message: error.message });
     }
 });
+//     try {
+//         const id = req.params.id;
+//         let showTimes = [];
+
+//         // Find the movie by ID
+//         const movie = await Movie.findById({_id: id, isActive: true });
+//         if (!movie) {
+//             return res.status(404).send('Movie not found');
+//         }
+
+//         // Find screens showing this movie
+//         const screens = await Screen.find({ id: movie._id }).populate('theatreId');
+
+//         // Organize data
+//         const theatreData = {};
+//         for (const screen of screens) {
+//             const theatreId = screen.theatreId._id;
+//             if (!theatreData[theatreId]) {
+//                 const theatre = await Theatre.findById(theatreId);
+//                 theatreData[theatreId] = {
+//                     theatre: theatre,
+//                     screens: []
+//                 };
+//             }
+//             theatreData[theatreId].screens.push(screen);
+//         }
+
+//         showTimes = ShowTime.find({ movieId: id, isActive: true });
+
+
+//         res.json({
+//             movie: movie,
+//             theatres: Object.values(theatreData),
+//             showTimes: showTimes
+//         });
+//     } catch (error) {
+//         console.error('Error while fetching movie:', error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// });
 
 router.post('/update/:id', async (req, res) => {
     try {

@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 
-const theaterSchema = new mongoose.Schema({
-  theatreId: { 
-    type: String 
-  },
+const theatreSchema = new mongoose.Schema({
+  // theatreId: {
+  //   type: String 
+  // },
   theatreName: {
     type: String 
   },
@@ -41,6 +41,6 @@ const theaterSchema = new mongoose.Schema({
 });
 
 
-const Theater = mongoose.model('theater', theaterSchema);
+const Theatre = mongoose.model('theatre', theatreSchema);
 
-module.exports = Theater;
+module.exports = Theatre;
