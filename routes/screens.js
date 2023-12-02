@@ -118,5 +118,33 @@ router.get('/get/:id', async (req, res) => {
     }
 })
 
-// Update and Delete routes
+router.post('/update/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const payload = req.body;
+        if (id) {
+            await Screen.findByIdAndUpdate(id, payload);
+            res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
+        } else {
+            res.status(500).send('screenId is required!!!');
+        }
+    } catch (error) {
+        console.error('Error while updating a screen:', error);
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+router.post('/delete/:id', async (req, res) => {
+    try {
+        if (req.params.id) {
+            await Screen.findByIdAndUpdate( req.params.id, {isActive: false });
+            res.json({ message: "Record deleted", status: HTTP_STATUS_CODES.OK });
+        } else {
+            res.status(500).send('screenId is required!!!');
+        }
+    } catch (error) {
+        console.error('Error while deleting a screen:', error);
+        res.status(500).send('Internal Server Error');
+    }
+})
 module.exports = router;

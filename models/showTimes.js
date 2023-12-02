@@ -24,6 +24,9 @@ const showTimeSchema = new mongoose.Schema({
     discountPrice: { 
         type: Number,
     },
+    seatsBooked: {
+        type: Array,
+    },
     isActive: {
         type: Boolean,
         default: true

@@ -16,6 +16,7 @@ router.post('/add', async (req, res) => {
             endTime: new Date(startTime.getTime() + 2 * 60 * 60 * 1000 + 30 * 60 * 1000),
             price: payload.price,
             discountPrice: payload.discountPrice,
+            seatsBooked: [],
             isActive: true
         });
 

@@ -91,7 +91,7 @@ router.get('/get/:id', async (req, res) => {
             theatres: theatresWithScreensAndShowtimes,
         };
 
-        res.json(response);
+        res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK, data: response });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
