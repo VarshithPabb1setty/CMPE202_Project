@@ -65,21 +65,22 @@ router.post("/login", async (req, res) => {
         }
         else {
             data = { email: payload.email, fullName: users[0].fullName }
-            createToken(req, res, email, password);
+            let token = createToken(req, res, email, password);
+            data.token = token;
             console.log(res.getHeaders()['set-cookie']);
             password_match = await bcrypt.compare(password, users[0].password)
             if (password_match) {
                 res.json({
                     message: 'user found',
                     status: HTTP_STATUS_CODES.OK,
-                    data: JSON.parse(data)
+                    data: data
                 })
             }
             else {
                 res.json({
                     message: 'password incorrect',
                     status: HTTP_STATUS_CODES.NOT_FOUND,
-                    data: JSON.parse(data)
+                    data: data
                 })
             }
 
@@ -138,7 +139,7 @@ router.post('/updateProfile', async (req, res) => {
             user.mobile = payload.mobile
             user.genres = []
             user.memberShipType = payload.memberShipType ? payload.memberShipType : 'none'
-            user.role = payload.role ? payload.role : 'none'
+            user.role = payload.role ? payload.role : 'non-member'
             // if (req.file)
             //     user.profileUrl = req.file.location
             user.favouriteArtists = [];
