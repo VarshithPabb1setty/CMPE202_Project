@@ -8,6 +8,8 @@ const ShowTimesRoute = require('./routes/showTimes')
 const MovieRoute = require('./routes/movies')
 const ScreenRoute = require('./routes/screens')
 const ArtistRoute = require('./routes/artists')
+const PaymentsRouter = require('./routes/payments');
+const TicketsRouter = require('./routes/tickets')
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 // const multer = require ('multer');
@@ -46,6 +48,8 @@ app.use('/screens', ScreenRoute)
 app.use('/showTimes', ShowTimesRoute)
 app.use('/movies', MovieRoute)
 app.use('/user', UserRoute)
+app.use('/payments', PaymentsRouter);
+app.use('/tickets', TicketsRouter);
 app.get('/home', (req, res) => {
   res.json({ message: 'Hello World!' })
 })

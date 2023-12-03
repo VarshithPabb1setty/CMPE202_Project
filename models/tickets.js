@@ -6,33 +6,33 @@ const ticketSchema = new mongoose.Schema({
     //     type: String, 
     //     required: true 
     // },
-    userId: { 
-        type: String, 
-        required: true 
+    userId: {
+        type: String,
+        required: true
     },
-    movieId: { 
-        type: String, 
-        required: true 
+    movieId: {
+        type: String,
+        required: true
     },
-    screenId: { 
-        type: String, 
-        required: true 
+    screenId: {
+        type: String,
+        required: true
     },
-    transactionId: { 
-        type: String, 
-        required: true 
+    transactionId: {
+        type: String,
+        required: true
     },
     showTime: {
-        type: Date, 
-        default: Date.now 
+        type: Date,
+        default: Date.now
     },
-    seatNos: { 
-        type: [String], 
-        required: true 
+    seatNos: {
+        type: [String],
+        required: true
     },
-    qrUrls: { 
-        type: [String], 
-        required: true 
+    qrUrls: {
+        type: [String],
+        required: true
     },
     isActive: {
         type: Boolean,
