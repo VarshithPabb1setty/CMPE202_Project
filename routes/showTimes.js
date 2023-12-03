@@ -69,58 +69,28 @@ router.get('/getAllScreens/:screenId', async (req, res) => {
     }
 });
 
-// router.get('/get/:id', async (req, res) => {
-//     try {
-//         const showTime = await ShowTime.find({ _id: req.params.id, isActive: true });
-//         console.log(showTime);
-
-//         if (showTime.length) {
-//             const screens = await Screen.find({ theatreId: theatre[0]._doc._id, isActive: true });
-
-//             if (screens.length) {
-//                 theatre[0]._doc.screensList = screens;
-//             } else {
-//                 theatre[0]._doc.screensList = [];
-//             }
-//         } else {
-//             res.json({
-//                 message: 'No record found',
-//                 status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR
-//             })
-//         }
-
-//         res.json({
-//             message: 'Record found',
-//             status: HTTP_STATUS_CODES.OK,
-//             data: theatre
-//         })
-
-//     }
-//     catch (err) {
-//         console.log(err);
-//         res.json({
-//             message: 'Theatre Not found',
-//             status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
-//             data: JSON.stringify("")
-//         })
-//     }
-// })
-
 router.post('/update/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const payload = req.body;
-        if (id) {
-            await ShowTime.findByIdAndUpdate(id, payload);
-            res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
-        } else {
-            res.status(500).send('movieId is required!!!');
+
+        if (!id) {
+            return res.status(500).send('movieId is required!!!');
         }
+
+        // If startTime is being updated, also update endTime
+        if (payload.startTime) {
+            const updatedStartTime = new Date(payload.startTime);
+            payload.endTime = new Date(updatedStartTime.getTime() + 2 * 60 * 60 * 1000 + 30 * 60 * 1000);
+        }
+
+        await ShowTime.findByIdAndUpdate(id, payload);
+        res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
     } catch (error) {
         console.error('Error while updating a show time:', error);
         res.status(500).send('Internal Server Error');
     }
-})
+});
 
 router.post('/delete/:id', async (req, res) => {
     try {

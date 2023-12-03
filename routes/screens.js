@@ -19,8 +19,8 @@ router.post('/add', async (req, res) => {
             isActive: true
         });
 
-        await newScreen.save();
-        res.json({ message: "Added screen successfully", status: HTTP_STATUS_CODES.OK });
+        const screen = await newScreen.save();
+        res.json({ message: "Added screen successfully", status: HTTP_STATUS_CODES.OK, data: screen });
     } catch (error) {
         console.error('Error while adding screen:', error);
         res.json({
