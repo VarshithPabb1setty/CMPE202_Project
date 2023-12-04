@@ -12,7 +12,7 @@ router.post('/add', async (req, res) => {
             screenName: payload.screenName,
             screenType: payload.screenType,
             rows: payload.rows,
-            columns: payload.col,
+            columns: payload.columns,
             seatingCapacity: payload.rows * payload.col,
             cost: payload.cost,
             theatreId: payload.theatreId,
