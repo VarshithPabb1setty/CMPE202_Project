@@ -18,7 +18,7 @@ router.post('/add', async (req, res) => {
             endTime: endTime,
             price: payload.price,
             discountPrice: payload.discountPrice,
-            seatsBooked: [],
+            seatsBooked: "",
             isActive: true
         });
 
