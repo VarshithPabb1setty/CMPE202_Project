@@ -32,10 +32,10 @@ router.post('/signup', async (req, res) => {
             genres: [],
             profileUrl: '',
             favouriteArtists: [],
-            role: 'non-member',
-            'memberShipType': 'none',
-            isAdmin: false,
-            isPrime: false,
+            role: payload.role ? payload.role : 'non-member',
+            memberShipType: payload.memberShipType ? payload.memberShipType: 'regular',
+            isAdmin: payload.role && payload.role === 'admin' ? true : false,
+            isPrime: payload.memberShipType && payload.memberShipType === 'premium' ? true : false,
             isActive: true
         });
 

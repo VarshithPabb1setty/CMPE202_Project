@@ -37,19 +37,19 @@ const userSchema = new mongoose.Schema({
   },
   memberShipType: {
     type: String,
-    enum: ['regular', 'premium', 'none'],
+    enum: ['regular', 'premium'],
     'default': 'none'
   },
   rewardPoints: {
     type: Number,
     default: 0
   },
-  // isAdmin: {
-  //   type: Boolean
-  // },
-  // isPrime: {
-  //   type: Boolean
-  // },
+  isAdmin: {
+    type: Boolean
+  },
+  isPrime: {
+    type: Boolean
+  },
   email: { 
     type: String,
     required: true, 
