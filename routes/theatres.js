@@ -3,8 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { HTTP_STATUS_CODES } = require('../constants')
 const Theatre = require('../models/theatres');
-const { Screen }= require('../models/screens');
-const uniqid = require('uniqid');
+const Screen = require('../models/screens');
 
 router.post('/add', async (req, res) => {
     try {
@@ -36,7 +35,7 @@ router.post('/add', async (req, res) => {
     }
 })
 
-router.post('/getAll', async (req, res) => {
+router.get('/getAll', async (req, res) => {
     try {
         const theatres = await Theatre.find( { isActive: true});
         if (theatres.length) {

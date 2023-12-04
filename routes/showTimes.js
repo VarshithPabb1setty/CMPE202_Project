@@ -8,25 +8,46 @@ const { HTTP_STATUS_CODES } = require('../constants')
 router.post('/add', async (req, res) => {
     try {
         payload = req.body;
-        let startTime = new Date(payload.startTime)
+        const startTime = new Date(payload.startTime); // Convert startTime to a Date object
+        const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000 + 30 * 60 * 1000);
+
         const newShowTime = new ShowTime({
             movieId: payload.movieId,
             screenId: payload.screenId,
-            startTime: payload.startTime,
-            endTime: new Date(startTime.getTime() + 2 * 60 * 60 * 1000 + 30 * 60 * 1000),
+            startTime: startTime,
+            endTime: endTime,
             price: payload.price,
             discountPrice: payload.discountPrice,
+            seatsBooked: [],
             isActive: true
         });
 
-        await newShowTime.save();
-        res.json({ message: "Added show times successfully", status: HTTP_STATUS_CODES.OK });
+        const createdShowTime = await newShowTime.save();
+        res.json({ message: "Added show times successfully", status: HTTP_STATUS_CODES.OK, data: createdShowTime });
     } catch (error) {
         console.error('Error while adding screen:', error);
         res.json({
             message: "Internal Server Error",
             status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR
         })
+    }
+});
+
+router.get('/get/:id', async (req, res) => {
+    try {
+        let id = req.params.id;
+
+        let showTime = await ShowTime.find({ _id: id, isActive: true});
+
+        res.json({
+            message: 'Record found',
+            status: HTTP_STATUS_CODES.OK,
+            data: showTime
+        });
+    }
+    catch (err) {
+        console.error('Error while fetching show times of particular movie:', err);
+        res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send('Internal Server Error');
     }
 });
 
@@ -66,58 +87,28 @@ router.get('/getAllScreens/:screenId', async (req, res) => {
     }
 });
 
-// router.get('/get/:id', async (req, res) => {
-//     try {
-//         const showTime = await ShowTime.find({ _id: req.params.id, isActive: true });
-//         console.log(showTime);
-
-//         if (showTime.length) {
-//             const screens = await Screen.find({ theatreId: theatre[0]._doc._id, isActive: true });
-
-//             if (screens.length) {
-//                 theatre[0]._doc.screensList = screens;
-//             } else {
-//                 theatre[0]._doc.screensList = [];
-//             }
-//         } else {
-//             res.json({
-//                 message: 'No record found',
-//                 status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR
-//             })
-//         }
-
-//         res.json({
-//             message: 'Record found',
-//             status: HTTP_STATUS_CODES.OK,
-//             data: theatre
-//         })
-
-//     }
-//     catch (err) {
-//         console.log(err);
-//         res.json({
-//             message: 'Theatre Not found',
-//             status: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
-//             data: JSON.stringify("")
-//         })
-//     }
-// })
-
 router.post('/update/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const payload = req.body;
-        if (id) {
-            await ShowTime.findByIdAndUpdate(id, payload);
-            res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
-        } else {
-            res.status(500).send('movieId is required!!!');
+
+        if (!id) {
+            return res.status(500).send('movieId is required!!!');
         }
+
+        // If startTime is being updated, also update endTime
+        if (payload.startTime) {
+            const updatedStartTime = new Date(payload.startTime);
+            payload.endTime = new Date(updatedStartTime.getTime() + 2 * 60 * 60 * 1000 + 30 * 60 * 1000);
+        }
+
+        await ShowTime.findByIdAndUpdate(id, payload);
+        res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
     } catch (error) {
         console.error('Error while updating a show time:', error);
         res.status(500).send('Internal Server Error');
     }
-})
+});
 
 router.post('/delete/:id', async (req, res) => {
     try {

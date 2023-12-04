@@ -17,4 +17,6 @@ exports.createToken = (req,res, email,password) => {
         expires:new Date(Date.now()+ 100000),
         httpOnly:true
       })
+
+      return token;
  }

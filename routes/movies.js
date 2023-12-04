@@ -5,10 +5,10 @@ const Movie = require('../models/movies');
 const Theatre = require('../models/theatres');
 const Screen = require('../models/screens');
 const ShowTime = require('../models/showTimes');
-const uniqid = require('uniqid');
 const { HTTP_STATUS_CODES } = require('../constants')
+const embedYouTubeUrlMiddleware = require('../Helpers/embedYouTubeUrl');
 
-router.post('/add', async (req, res) => {
+router.post('/add', embedYouTubeUrlMiddleware, async (req, res) => {
     try {
         console.log(req.body);
         const payload = req.body;
@@ -35,7 +35,7 @@ router.post('/add', async (req, res) => {
 
         // Save the movie to the database
         const movie = await newMovie.save();
-        res.json({ message: "Added movie successfully", status: HTTP_STATUS_CODES.OK,  movie: movie });
+        res.json({ message: "Added movie successfully", status: HTTP_STATUS_CODES.OK,  data: movie });
     } catch (error) {
         console.error('Error creating movie:', error);
         res.status(500).send('Internal Server Error');
@@ -45,7 +45,7 @@ router.post('/add', async (req, res) => {
 router.get('/getAll', async (req, res) => {
     try {
         const movies = await Movie.find({ isActive: true });
-        res.json({ message: "Record[s] found", status: HTTP_STATUS_CODES.OK, movies: movies });
+        res.json({ message: "Record[s] found", status: HTTP_STATUS_CODES.OK, data: movies });
     } catch (error) {
         console.error('Error on getting list of movies:', error);
         res.status(500).send('Internal Server Error');
@@ -91,67 +91,52 @@ router.get('/get/:id', async (req, res) => {
             theatres: theatresWithScreensAndShowtimes,
         };
 
-        res.json(response);
+        res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK, data: response });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error while updating a movie:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
-//     try {
-//         const id = req.params.id;
-//         let showTimes = [];
-
-//         // Find the movie by ID
-//         const movie = await Movie.findById({_id: id, isActive: true });
-//         if (!movie) {
-//             return res.status(404).send('Movie not found');
-//         }
-
-//         // Find screens showing this movie
-//         const screens = await Screen.find({ id: movie._id }).populate('theatreId');
-
-//         // Organize data
-//         const theatreData = {};
-//         for (const screen of screens) {
-//             const theatreId = screen.theatreId._id;
-//             if (!theatreData[theatreId]) {
-//                 const theatre = await Theatre.findById(theatreId);
-//                 theatreData[theatreId] = {
-//                     theatre: theatre,
-//                     screens: []
-//                 };
-//             }
-//             theatreData[theatreId].screens.push(screen);
-//         }
-
-//         showTimes = ShowTime.find({ movieId: id, isActive: true });
-
-
-//         res.json({
-//             movie: movie,
-//             theatres: Object.values(theatreData),
-//             showTimes: showTimes
-//         });
-//     } catch (error) {
-//         console.error('Error while fetching movie:', error);
-//         res.status(500).send('Internal Server Error');
-//     }
-// });
 
 router.post('/update/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const payload = req.body;
-        if (id) {
-            await Movie.findByIdAndUpdate(id, payload);
-            res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
+
+        // Check if movieTrailerUrl is present in the payload
+        if (payload.movieTrailerUrl) {
+            // Apply the embedYoutubeUrlMiddleware
+            embedYouTubeUrlMiddleware(req, res, () => {
+                // After the middleware has run, you can access the updated req.body
+                // The movieTrailerUrl will be converted to an embedded URL if it exists
+                if (id) {
+                    // Now you can safely update the movie with the modified req.body
+                    Movie.findByIdAndUpdate(id, req.body)
+                        .then(() => {
+                            res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
+                        })
+                        .catch((error) => {
+                            console.error('Error while updating a movie:', error);
+                            res.status(500).send('Internal Server Error');
+                        });
+                } else {
+                    res.status(500).send('movieId is required!!!');
+                }
+            });
         } else {
-            res.status(500).send('movieId is required!!!');
+            // If movieTrailerUrl is not present, you can update the movie without the middleware
+            if (id) {
+                await Movie.findByIdAndUpdate(id, payload);
+                res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
+            } else {
+                res.status(500).send('movieId is required!!!');
+            }
         }
     } catch (error) {
         console.error('Error while updating a movie:', error);
         res.status(500).send('Internal Server Error');
     }
-})
+});
 
 router.post('/delete/:id', async (req, res) => {
     try {

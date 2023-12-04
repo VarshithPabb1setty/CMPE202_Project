@@ -5,8 +5,9 @@ const bcrypt = require('bcrypt');
 const User = require('../models/users');
 const { HTTP_STATUS_CODES } = require('../constants')
 const { createToken } = require('../Helpers/JwtAuth');
-const uniqid = require('uniqid');
+// const uniqid = require('uniqid');
 const saltRounds = 10;
+const Ticket = require('../models/tickets');
 const Payment = require('../models/payments');
 // const { upload } = require('../index');
 router.get('/addUser', (req, res) => {
@@ -19,7 +20,7 @@ router.post('/signup', async (req, res) => {
         const payload = req.body;
         const password = await bcrypt.hash(payload.password, saltRounds);
         const newUser = new User({
-            userId: uniqid(),
+            // userId: uniqid(),
             fullName: payload.name,
             email: payload.email,
             password: password,
@@ -39,8 +40,8 @@ router.post('/signup', async (req, res) => {
         });
 
         // Save the user to the database
-        await newUser.save();
-        res.json({ message: "User registered successfully", status: HTTP_STATUS_CODES.OK });
+        const user = await newUser.save();
+        res.json({ message: "User registered successfully", status: HTTP_STATUS_CODES.OK, data: user });
     } catch (error) {
         console.error('Error creating user:', error);
         res.status(500).send('Internal Server Error');
@@ -64,21 +65,22 @@ router.post("/login", async (req, res) => {
         }
         else {
             data = { email: payload.email, fullName: users[0].fullName }
-            createToken(req, res, email, password);
+            let token = createToken(req, res, email, password);
+            data.token = token;
             console.log(res.getHeaders()['set-cookie']);
             password_match = await bcrypt.compare(password, users[0].password)
             if (password_match) {
                 res.json({
                     message: 'user found',
                     status: HTTP_STATUS_CODES.OK,
-                    data: JSON.parse(data)
+                    data: data
                 })
             }
             else {
                 res.json({
                     message: 'password incorrect',
                     status: HTTP_STATUS_CODES.NOT_FOUND,
-                    data: JSON.parse(data)
+                    data: data
                 })
             }
 
@@ -124,26 +126,46 @@ router.get('/viewProfile/:id', async (req, res) => {
 })
 
 router.post('/updateProfile', async (req, res) => {
-    console.log(req.body);
-    const payload = req.body;
-    const user = await User.findOne({ email: payload.email });
-    console.log(user);
-    if (user) {
-        user.firstName = payload.firstName
-        user.lastName = payload.lastName
-        user.dob = payload.birthDate
-        user.gender = payload.gender
-        user.mobile = payload.mobile
-        user.genres = []
-        user.memberShipType = payload.memberShipType ? payload.memberShipType : 'none'
-        user.role = payload.role ? payload.role : 'none'
-        // if (req.file)
-        //     user.profileUrl = req.file.location
-        user.favouriteArtists = [];
-        await user.save();
-        res.json({ message: "User details updated successfully", status: HTTP_STATUS_CODES.OK });
-    } else {
-        res.json({ message: "Cannot update user details", status: HTTP_STATUS_CODES.NOT_FOUND });
+    try {
+        console.log(req.body);
+        const payload = req.body;
+        const user = await User.findOne({ email: payload.email });
+        console.log(user);
+        if (user) {
+            user.firstName = payload.firstName
+            user.lastName = payload.lastName
+            user.dob = payload.birthDate
+            user.gender = payload.gender
+            user.mobile = payload.mobile
+            user.genres = []
+            user.memberShipType = payload.memberShipType ? payload.memberShipType : 'none'
+            user.role = payload.role ? payload.role : 'non-member'
+            // if (req.file)
+            //     user.profileUrl = req.file.location
+            user.favouriteArtists = [];
+            await user.save();
+            res.json({ message: "User details updated successfully", status: HTTP_STATUS_CODES.OK });
+        } else {
+            res.json({ message: "Cannot update user details", status: HTTP_STATUS_CODES.NOT_FOUND });
+        }
+    } catch (error) {
+        console.error('Error while updating profile:', error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+router.get('/purchaseHistory/:id', async (req, res) => {
+    try {
+        const ticketsPurchased = await Ticket.find({ userId: req.params.id, isActive: true});
+
+        if (!ticketsPurchased) {
+            res.json({ message: "0 Record[s] found", status: HTTP_STATUS_CODES.OK, data: [] });
+        } else {
+            res.json({ message: "Record[s] found", status: HTTP_STATUS_CODES.OK, data: ticketsPurchased });
+        }
+    } catch (error) {
+        console.error('Error fetching purchase history:', error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 });
 
