@@ -64,16 +64,15 @@ router.post("/login", async (req, res) => {
             })
         }
         else {
-            data = { email: payload.email, fullName: users[0].fullName }
             let token = createToken(req, res, email, password);
-            data.token = token;
+            users[0]._doc.token = token;
             console.log(res.getHeaders()['set-cookie']);
             password_match = await bcrypt.compare(password, users[0].password)
             if (password_match) {
                 res.json({
                     message: 'user found',
                     status: HTTP_STATUS_CODES.OK,
-                    data: data
+                    data: users[0]
                 })
             }
             else {
