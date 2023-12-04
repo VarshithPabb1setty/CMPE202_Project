@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
   memberShipType: {
     type: String,
     enum: ['regular', 'premium'],
-    'default': 'none'
+    'default': 'regular'
   },
   rewardPoints: {
     type: Number,
