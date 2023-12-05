@@ -3,20 +3,30 @@ const express = require('express')
 const router = express.Router();
 const Screen = require('../models/screens');
 const ShowTime = require('../models/showTimes');
+const defaultSeats = require('../Helpers/defaultSeats')
 const { HTTP_STATUS_CODES } = require('../constants')
 
 router.post('/add', async (req, res) => {
     try {
         payload = req.body;
-        const seatConfig = payload.seats;
+        let seatConfig = payload.seats;
+        if (!seatConfig || Object.keys(seatConfig).length === 0) {
+            seatConfig = defaultSeats;
+        }
+
+        const defaultRows = 13;
+        const defaultColumns = 12;
+
+        const rows = payload.rows || defaultRows;
+        const columns = payload.col || defaultColumns;
 
         const newScreen = new Screen({
             screenName: payload.screenName,
             screenType: payload.screenType,
-            rows: payload.rows,
-            columns: payload.col,
-            seatingCapacity: payload.rows * payload.col,
-            seatsAvailable: payload.rows * payload.col,
+            rows: rows,
+            columns: columns,
+            seatingCapacity: rows * columns,
+            seatsAvailable: rows * columns,
             cost: payload.cost,
             seats: JSON.stringify(seatConfig),
             theatreId: payload.theatreId,
