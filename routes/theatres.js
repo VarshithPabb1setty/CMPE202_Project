@@ -4,6 +4,8 @@ const router = express.Router();
 const { HTTP_STATUS_CODES } = require('../constants')
 const Theatre = require('../models/theatres');
 const Screen = require('../models/screens');
+const Movie = require('../models/movies');
+const ShowTime = require('../models/showTimes');
 
 router.post('/add', async (req, res) => {
     try {
@@ -37,33 +39,42 @@ router.post('/add', async (req, res) => {
 
 router.get('/getAll', async (req, res) => {
     try {
-        const theatres = await Theatre.find( { isActive: true});
-        if (theatres.length) {
-            const screens = await Screen.find({ isActive: true });
-
-            if (screens.length) {
-                theatres.forEach(theatre => {
-                    // Filter screens for the current theatre
-                    const screensList = screens.filter(screen => screen.theatreId.toString() === theatre._id.toString());
-                    // Assign screensList to the current theatre
-                    theatre._doc.screensDetail = screensList; // Using _doc to directly modify the document
-                });
-            }
-        } else {
-            return res.json({
-                message: 'No theatres found',
-                status: HTTP_STATUS_CODES.OK,
-                data: []
-            });
-        }
+        const theatres = await Theatre.aggregate([
+            {
+                $match: { isActive: true }
+            },
+            {
+                $lookup: {
+                    from: 'screens',
+                    localField: '_id',
+                    foreignField: 'theatreId',
+                    as: 'screensList'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'showtimes',
+                    localField: 'screensList._id',
+                    foreignField: 'screenId',
+                    as: 'showTimesList'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'movies',
+                    localField: 'showTimesList.movieId',
+                    foreignField: '_id',
+                    as: 'moviesList'
+                }
+            },
+        ]);
 
         res.json({
             message: 'Records found',
             status: HTTP_STATUS_CODES.OK,
             data: theatres
         });
-    }
-    catch (err) {
+    } catch (err) {
         console.error('Error while fetching theatres:', err);
         res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send('Internal Server Error');
     }
