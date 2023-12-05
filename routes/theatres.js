@@ -10,6 +10,7 @@ const ShowTime = require('../models/showTimes');
 router.post('/add', async (req, res) => {
     try {
         const payload = req.body;
+        
         const newTheatre = new Theatre({
             // theatreId: uniqid(),
             theatreName: payload.theatreName ? payload.theatreName : null,
