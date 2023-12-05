@@ -141,7 +141,6 @@ router.post('/update/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const payload = req.body;
-
         if (payload.seats) {
             payload.seats = JSON.stringify(payload.seats);
         }

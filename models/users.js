@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   //   type: String,
   // },
   firstName: 
-  {
+  { 
     type: String
   },
   lastName: {
@@ -37,19 +37,19 @@ const userSchema = new mongoose.Schema({
   },
   memberShipType: {
     type: String,
-    enum: ['regular', 'premium', 'none'],
-    'default': 'none'
+    enum: ['regular', 'premium'],
+    'default': 'regular'
   },
   rewardPoints: {
     type: Number,
     default: 0
   },
-  // isAdmin: {
-  //   type: Boolean
-  // },
-  // isPrime: {
-  //   type: Boolean
-  // },
+  isAdmin: {
+    type: Boolean
+  },
+  isPrime: {
+    type: Boolean
+  },
   email: { 
     type: String,
     required: true, 

@@ -33,6 +33,23 @@ router.post('/add', async (req, res) => {
     }
 });
 
+router.get('/getAll', async (req, res) => {
+    try {
+
+        let showTimes = await ShowTime.find({ isActive: true });
+
+        res.json({
+            message: 'Record[s] found',
+            status: HTTP_STATUS_CODES.OK,
+            data: showTimes
+        });
+    }
+    catch (err) {
+        console.error('Error while fetching show times of particular movie:', err);
+        res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send('Internal Server Error');
+    }
+});
+
 router.get('/get/:id', async (req, res) => {
     try {
         let id = req.params.id;
@@ -101,7 +118,6 @@ router.post('/update/:id', async (req, res) => {
             const updatedStartTime = new Date(payload.startTime);
             payload.endTime = new Date(updatedStartTime.getTime() + 2 * 60 * 60 * 1000 + 30 * 60 * 1000);
         }
-
         await ShowTime.findByIdAndUpdate(id, payload);
         res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
     } catch (error) {

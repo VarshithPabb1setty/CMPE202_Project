@@ -35,7 +35,7 @@ const ticketSchema = new mongoose.Schema({
         required:true
     },
     qrUrls: {
-        type: [String],
+        type: [String], // Change the type to string
         required: true
     },
     totalCost:{
