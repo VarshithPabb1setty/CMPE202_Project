@@ -39,7 +39,7 @@ router.post('/add', async (req, res) => {
 
 router.get('/getAll', async (req, res) => {
     try {
-        const theatres = await Theatre.aggregate([
+        const theaters = await Theatre.aggregate([
             {
                 $match: { isActive: true }
             },
@@ -67,18 +67,53 @@ router.get('/getAll', async (req, res) => {
                     as: 'moviesList'
                 }
             },
+            {
+                $project: {
+                    theatreName: 1,
+                    description: 1,
+                    location: 1,
+                    state: 1,
+                    address: 1,
+                    zip: 1,
+                    contact: 1,
+                    city: 1,
+                    theatreUrl: 1,
+                    isActive: 1,
+                    moviesList: {
+                        $map: {
+                            input: '$moviesList',
+                            as: 'movie',
+                            in: {
+                                $mergeObjects: [
+                                    '$$movie',
+                                    {
+                                        showTimesList: {
+                                            $filter: {
+                                                input: '$showTimesList',
+                                                as: 'showTime',
+                                                cond: { $eq: ['$$movie._id', '$$showTime.movieId'] }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
         ]);
 
         res.json({
             message: 'Records found',
             status: HTTP_STATUS_CODES.OK,
-            data: theatres
+            data: theaters
         });
     } catch (err) {
         console.error('Error while fetching theatres:', err);
         res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send('Internal Server Error');
     }
 });
+
 
 router.get('/get/:id', async (req, res) => {
 
