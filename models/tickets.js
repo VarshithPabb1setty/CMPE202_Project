@@ -25,13 +25,21 @@ const ticketSchema = new mongoose.Schema({
     showTime: {
         type: Date,
         default: Date.now
-    },                 // Add showId as well
-    seatNos: {
-        type: [String],
+    },
+    seats: {
+        type: String,
         required: true
+    },
+    numberOfSeats: {
+        type: Number,
+        required:true
     },
     qrUrls: {
         type: [String], // Change the type to string
+        required: true
+    },
+    totalCost:{
+        type: Number,
         required: true
     },
     isActive: {

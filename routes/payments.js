@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const { HTTP_STATUS_CODES } = require('../constants')
 const Payment = require('../models/payments');
 
 router.post('/', async (req, res) => {
@@ -24,10 +24,10 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.get('/:paymentId', async (req, res) => {
+router.get('/:transactionId', async (req, res) => {
     try {
-        const paymentId = req.params.paymentId;
-        const payment = await Payment.findById(paymentId);
+        const transactionId = req.params.transactionId;
+        const payment = await Payment.findOne({ transactionId: transactionId });
 
         if (!payment) {
             return res.status(404).send('Payment not found');
@@ -40,12 +40,12 @@ router.get('/:paymentId', async (req, res) => {
     }
 });
 
-router.put('/:paymentId', async (req, res) => {
+router.put('/:transactionId', async (req, res) => {
     try {
-        const paymentId = req.params.paymentId;
+        const transactionId = req.params.transactionId;
         const { status } = req.body;
 
-        const updatedPayment = await Payment.findByIdAndUpdate(paymentId, { status }, { new: true });
+        const updatedPayment = await Payment.findOneAndUpdate(transactionId, { status }, { new: true });
 
         if (!updatedPayment) {
             return res.status(404).send('Payment not found');

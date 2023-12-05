@@ -3,18 +3,32 @@ const express = require('express')
 const router = express.Router();
 const Screen = require('../models/screens');
 const ShowTime = require('../models/showTimes');
+const defaultSeats = require('../Helpers/defaultSeats')
 const { HTTP_STATUS_CODES } = require('../constants')
 
 router.post('/add', async (req, res) => {
     try {
         payload = req.body;
+        let seatConfig = payload.seats;
+        if (!seatConfig || Object.keys(seatConfig).length === 0) {
+            seatConfig = defaultSeats;
+        }
+
+        const defaultRows = 13;
+        const defaultColumns = 12;
+
+        const rows = payload.rows || defaultRows;
+        const columns = payload.col || defaultColumns;
+
         const newScreen = new Screen({
             screenName: payload.screenName,
             screenType: payload.screenType,
-            rows: payload.rows,
-            columns: payload.col,
-            seatingCapacity: payload.rows * payload.col,
+            rows: rows,
+            columns: columns,
+            seatingCapacity: rows * columns,
+            seatsAvailable: rows * columns,
             cost: payload.cost,
+            seats: JSON.stringify(seatConfig),
             theatreId: payload.theatreId,
             isActive: true
         });
@@ -32,7 +46,7 @@ router.post('/add', async (req, res) => {
 
 router.get('/getAll', async (req, res) => {
     try {
-        const screens = await Screen.find( { isActive: true});
+        const screens = await Screen.find({ isActive: true });
         if (screens.length) {
             const showTimes = await ShowTime.find({ isActive: true });
 
@@ -137,6 +151,9 @@ router.post('/update/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const payload = req.body;
+        if (payload.seats) {
+            payload.seats = JSON.stringify(payload.seats);
+        }
         if (id) {
             await Screen.findByIdAndUpdate(id, payload);
             res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
@@ -152,7 +169,7 @@ router.post('/update/:id', async (req, res) => {
 router.post('/delete/:id', async (req, res) => {
     try {
         if (req.params.id) {
-            await Screen.findByIdAndUpdate( req.params.id, {isActive: false });
+            await Screen.findByIdAndUpdate(req.params.id, { isActive: false });
             res.json({ message: "Record deleted", status: HTTP_STATUS_CODES.OK });
         } else {
             res.status(500).send('screenId is required!!!');

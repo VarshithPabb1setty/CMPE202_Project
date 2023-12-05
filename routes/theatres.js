@@ -4,10 +4,13 @@ const router = express.Router();
 const { HTTP_STATUS_CODES } = require('../constants')
 const Theatre = require('../models/theatres');
 const Screen = require('../models/screens');
+const Movie = require('../models/movies');
+const ShowTime = require('../models/showTimes');
 
 router.post('/add', async (req, res) => {
     try {
         const payload = req.body;
+        
         const newTheatre = new Theatre({
             // theatreId: uniqid(),
             theatreName: payload.theatreName ? payload.theatreName : null,
@@ -37,37 +40,81 @@ router.post('/add', async (req, res) => {
 
 router.get('/getAll', async (req, res) => {
     try {
-        const theatres = await Theatre.find( { isActive: true});
-        if (theatres.length) {
-            const screens = await Screen.find({ isActive: true });
-
-            if (screens.length) {
-                theatres.forEach(theatre => {
-                    // Filter screens for the current theatre
-                    const screensList = screens.filter(screen => screen.theatreId.toString() === theatre._id.toString());
-                    // Assign screensList to the current theatre
-                    theatre._doc.screensDetail = screensList; // Using _doc to directly modify the document
-                });
+        const theaters = await Theatre.aggregate([
+            {
+                $match: { isActive: true }
+            },
+            {
+                $lookup: {
+                    from: 'screens',
+                    localField: '_id',
+                    foreignField: 'theatreId',
+                    as: 'screensList'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'showtimes',
+                    localField: 'screensList._id',
+                    foreignField: 'screenId',
+                    as: 'showTimesList'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'movies',
+                    localField: 'showTimesList.movieId',
+                    foreignField: '_id',
+                    as: 'moviesList'
+                }
+            },
+            {
+                $project: {
+                    theatreName: 1,
+                    description: 1,
+                    location: 1,
+                    state: 1,
+                    address: 1,
+                    zip: 1,
+                    contact: 1,
+                    city: 1,
+                    theatreUrl: 1,
+                    isActive: 1,
+                    moviesList: {
+                        $map: {
+                            input: '$moviesList',
+                            as: 'movie',
+                            in: {
+                                $mergeObjects: [
+                                    '$$movie',
+                                    {
+                                        showTimesList: {
+                                            $filter: {
+                                                input: '$showTimesList',
+                                                as: 'showTime',
+                                                cond: { $eq: ['$$movie._id', '$$showTime.movieId'] }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
             }
-        } else {
-            return res.json({
-                message: 'No theatres found',
-                status: HTTP_STATUS_CODES.OK,
-                data: []
-            });
-        }
+        ]);
 
         res.json({
             message: 'Records found',
             status: HTTP_STATUS_CODES.OK,
-            data: theatres
+            data: theaters
         });
-    }
-    catch (err) {
+    } catch (err) {
         console.error('Error while fetching theatres:', err);
         res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send('Internal Server Error');
     }
 });
+
 
 router.get('/get/:id', async (req, res) => {
 
