@@ -18,7 +18,7 @@ router.post('/add', async (req, res) => {
             endTime: endTime,
             price: payload.price,
             discountPrice: payload.discountPrice,
-            seatsBooked: [],
+            seatsBooked: "",
             isActive: true
         });
 
@@ -118,7 +118,6 @@ router.post('/update/:id', async (req, res) => {
             const updatedStartTime = new Date(payload.startTime);
             payload.endTime = new Date(updatedStartTime.getTime() + 2 * 60 * 60 * 1000 + 30 * 60 * 1000);
         }
-
         await ShowTime.findByIdAndUpdate(id, payload);
         res.json({ message: "Record updated", status: HTTP_STATUS_CODES.OK });
     } catch (error) {

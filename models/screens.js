@@ -10,36 +10,40 @@ const screenSchema = new mongoose.Schema({
     // screenId: {
     //     type: String,
     // },
-    screenType: { 
-        type: String, 
-        required: true 
+    screenType: {
+        type: String,
+        required: true
     },
-    seatingCapacity: { 
-        type: Number, 
-        required: true 
+    seatingCapacity: {
+        type: Number,
+        required: true
     },
-    screenName: { 
-        type: String, 
-        required: true 
+    screenName: {
+        type: String,
+        required: true
     },
-    rows: { 
-        type: Number, 
-        required: true 
+    rows: {
+        type: Number,
+        required: true
     },
-    columns: { 
-        type: Number, 
-        required: true 
+    columns: {
+        type: Number,
+        required: true
     },
     cost: {
-        type: Number 
+        type: Number
     },
     theatreId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
     },
-    seatArray: {
-        type: [], 
-        required: true 
+    seatsAvailable: {
+        type: Number,
+        required: true
+    },
+    seats: {
+        type: String,
+        required: true
     },
     occupancyStatus: {
         type: [String],

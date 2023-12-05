@@ -25,7 +25,7 @@ const showTimeSchema = new mongoose.Schema({
         type: Number,
     },
     seatsBooked: {
-        type: Array,
+        type: String,
     },
     isActive: {
         type: Boolean,
